@@ -5,14 +5,14 @@ import {
 } from "../middleware/auth.middleware.js";
 import {
   getStudentProfile,
-  getStudentLeaveStats,
-  getStudentLeaves,
-  submitLeave,
+  // getStudentLeaveStats,
+  // getStudentLeaves,
+  // submitLeave,
   updateStudentProfile,
-  getStudentDashboard,
+  getStudentDashboardData,
   changeStudentPassword,
-  getStudentRoomates,
-  uploadProfilePicture,
+  // getStudentRoomates,
+  // uploadProfilePicture,
 } from "../controllers/student.controller.js";
 import {
   createComplaint,
@@ -20,12 +20,13 @@ import {
   updateComplaint,
   deleteStudentComplaint,
 } from "../controllers/Complaints.controller.js";
-import { configureMulter } from "../middleware/upload.middleware.js"; // Import the multer configuration
-import { getMessPhoto } from "../controllers/mess.controller.js";
+// import { configureMulter } from "../middleware/upload.middleware.js"; // Import the multer configuration
+// import { getMessPhoto } from "../controllers/mess.controller.js";
 
 // Configure multer for profile photos
-const profileUpload = configureMulter("profile_photos");
+// const profileUpload = configureMulter("profile_photos");
 
+import { viewCourses, withdrawFromCourse, viewEnrolledCourses } from "../controllers/course.controller.js"
 const router = express.Router();
 
 // Student profile routes
@@ -50,24 +51,26 @@ router.put(
   changeStudentPassword
 );
 
-// Leave management routes
+// // Leave management routes
+// router.get(
+//   "/leaves",
+//   authenticateToken,
+//   authorizeRoles(["student"]),
+//   // getStudentLeaves
+// );
+// router.post(
+//   "/leaves/apply",
+//   authenticateToken,
+//   authorizeRoles(["student"]),
+//   // submitLeave
+// );
+
+
 router.get(
-  "/leaves",
+  "/complaint",
   authenticateToken,
   authorizeRoles(["student"]),
-  getStudentLeaves
-);
-router.post(
-  "/leaves/apply",
-  authenticateToken,
-  authorizeRoles(["student"]),
-  submitLeave
-);
-router.get(
-  "/leave-stats",
-  authenticateToken,
-  authorizeRoles(["student"]),
-  getStudentLeaveStats
+  getStudentComplaints
 );
 
 // Dashboard route
@@ -75,15 +78,32 @@ router.get(
   "/dashboard",
   authenticateToken,
   authorizeRoles(["student"]),
-  getStudentDashboard
+  getStudentDashboardData
 );
 
-// Roommates route
+// Course route
 router.get(
-  "/roommates",
+  "/enrollInCourse",
   authenticateToken,
   authorizeRoles(["student"]),
-  getStudentRoomates
+  viewCourses
+);
+
+// Withdraw route
+router.get(
+  "/enrollInCourse",
+  authenticateToken,
+  authorizeRoles(["student"]),
+  withdrawFromCourse
+);
+
+
+// All Enrolled Courses route
+router.get(
+  "/mycourses",
+  authenticateToken,
+  authorizeRoles(["student"]),
+  viewEnrolledCourses
 );
 
 // Complaint routes
@@ -117,8 +137,8 @@ router.post(
   "/upload-profile-pic",
   authenticateToken,
   authorizeRoles(["student"]),
-  profileUpload.single("profilePic"), // Use the configured profileUpload middleware
-  uploadProfilePicture
+  // profileUpload.single("profilePic"), // Use the configured profileUpload middleware
+  // uploadProfilePicture
 );
 
 //mess-controls
@@ -127,7 +147,7 @@ router.get(
   "/mess-menu",
   authenticateToken,
   authorizeRoles(["student"]),
-  getMessPhoto
+  // getMessPhoto
 );
 
 export default router;

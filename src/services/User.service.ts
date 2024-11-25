@@ -1,4 +1,4 @@
-import User, { IUser } from "../models/user.model.js";
+import { User, IUser } from "../models/user.model.js";
 
 /**
  * Updates the profile picture URL for a user.

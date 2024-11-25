@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Complaint from "../models/complaints.model.js";
-import User from "../models/user.model.js";
+import { User } from "../models/user.model.js"; // Correct import for named export
 
 // Create Complaint
 // const errorMessage = error.message || 'An unknown error occurred';
@@ -13,7 +13,7 @@ export const createComplaint = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "Description is required" });
     }
 
-    if (!type || !["Maintenance", "Disciplinary", "Other"].includes(type)) {
+    if (!type || !["Enroll", "Withdraw", "Completion","Other"].includes(type)) {
       return res.status(400).json({ success: false, message: "Invalid complaint type" });
     }
 
@@ -21,7 +21,7 @@ export const createComplaint = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
 
-    const student = await User.findById(studentId).select("firstName roomNumber role").lean();
+    const student = await User.findById(studentId).select("firstName lastName role").lean();
     if (!student || student.role !== "student") {
       return res.status(403).json({ success: false, message: "Only students can create complaints" });
     }
@@ -30,7 +30,7 @@ export const createComplaint = async (req: Request, res: Response) => {
       student: studentId,
       description: description.trim(),
       type,
-      studentDetails: { firstName: student.firstName, roomNumber: student.roomNumber },
+      studentDetails: { firstName: student.firstName, lastName: student.lastName },
     });
 
     return res.status(201).json({
@@ -63,21 +63,34 @@ export const getComplaints = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const complaints = await Complaint.find()
-      .populate("student", "firstName roomNumber")
+      .populate("student", "firstName lastName") // Ensure correct path and field names
+      .sort({ createdAt: -1 }) // Optional: Sort by creation date (most recent first)
       .skip(skip)
       .limit(limit)
       .lean()
       .exec();
 
-    res.status(200).json({ success: true, complaints });
+    const totalComplaints = await Complaint.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      complaints,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalComplaints / limit),
+        totalComplaints,
+      },
+    });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      res.status(500).json({ success: false, error: error.message });
-    } else {
-      res.status(500).json({ success: false, error: "Unknown error" });
-    }
+    console.error("Error fetching complaints:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch complaints",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
+
 
 // Update Complaint (Student)
 export const updateComplaint = async (req: Request, res: Response) => {
@@ -103,7 +116,7 @@ export const updateComplaint = async (req: Request, res: Response) => {
     }
 
     if (type) {
-      if (!["Maintenance", "Disciplinary", "Other"].includes(type)) {
+      if (!["Enroll", "Withdraw", "Completion", "Other", "All"].includes(type)) {
         return res.status(400).json({ success: false, message: "Invalid complaint type" });
       }
       complaint.type = type;
@@ -144,21 +157,41 @@ export const deleteComplaint = async (req: Request, res: Response) => {
 // Get Student's Own Complaints
 export const getStudentComplaints = async (req: Request, res: Response) => {
   try {
-    const studentId = req.user?._id;
-    if (!studentId) {
+    const instructorId = req.user?._id;
+
+    if (!instructorId) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const complaints = await Complaint.find({ student: studentId }).sort({ createdAt: -1 }).lean();
+    // Filter complaints optionally based on query params (e.g., status, type)
+    const { status, type } = req.query;
+    const filter: Record<string, any> = {};
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (type) {
+      filter.type = type;
+    }
+
+    const complaints = await Complaint.find(filter)
+      .populate("student", "firstName lastName")
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
     res.status(200).json({ success: true, complaints });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      res.status(500).json({ success: false, error: error.message });
-    } else {
-      res.status(500).json({ success: false, error: "Unknown error" });
-    }
+    console.error("Error fetching student complaints:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch student complaints",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
+
 export const deleteStudentComplaint = async (req: Request, res: Response) => {
   const { id } = req.params;
   const studentId = req.user?._id;
@@ -205,68 +238,6 @@ export const deleteStudentComplaint = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: error.message });
     } else {
       return res.status(500).json({ success: false, error: "Unknown error" });
-    }
-  }
-};
-
-export const getParentsComplaints = async (req: Request, res: Response) => {
-  try {
-    const parentId = req.user?._id;
-
-    // Find parent and their children
-    const parent = await User.findOne({
-      _id: parentId,
-      role: "parent",
-    });
-
-    if (!parent) {
-      return res.status(404).json({ success: false, message: "Parent not found" });
-    }
-
-    // Find all children using parent's children array
-    const children = await User.find({
-      _id: { $in: parent.children },
-      role: "student",
-    });
-
-    if (!children.length) {
-      return res.status(404).json({ success: false, message: "No children found" });
-    }
-
-    // Get complaints for all children
-    const complaints = await Complaint.find({
-      student: { $in: children.map((child) => child._id) },
-    })
-      .populate("student", "firstName lastName roomNumber")
-      .lean()
-      .exec();
-
-    const transformedComplaints = complaints.map((complaint) => ({
-      _id: complaint._id,
-      type: complaint.type, // Include the type in the response
-      description: complaint.description,
-      status: complaint.status,
-      studentDetails: {
-        firstName: complaint.student
-          ? `${(complaint.student as any).firstName} ${(complaint.student as any).lastName}`
-          : "N/A",
-        roomNumber: complaint.student
-          ? (complaint.student as any).roomNumber
-          : "N/A",
-      },
-      createdAt: complaint.createdAt,
-      updatedAt: complaint.updatedAt,
-    }));
-
-    res.status(200).json({
-      success: true,
-      complaints: transformedComplaints,
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      res.status(500).json({ success: false, error: error.message });
-    } else {
-      res.status(500).json({ success: false, error: "Unknown error" });
     }
   }
 };
