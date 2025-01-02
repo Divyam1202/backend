@@ -15,7 +15,9 @@ export interface IUser extends mongoose.Document {
   skills?: string[]; // Array of skills
   portfolio?: mongoose.Types.ObjectId; // Reference to the Portfolio model
   courses: mongoose.Types.ObjectId[]; // Courses field, referencing Course model
-  comparePassword(candidatePassword: string): Promise<boolean>; // Compare passwords method
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 // Define the User schema
@@ -72,6 +74,14 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
       ref: "Portfolio", // Reference to the Portfolio model
     },
     courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }], // Add courses field
+    resetPasswordToken: {
+      type: String,
+      default: null, // Default to null if no token is generated
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null, // Default to null if no expiration is set
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

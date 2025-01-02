@@ -1,0 +1,67 @@
+import nodemailer from "nodemailer";
+import User, { IUser } from "../models/user.model.js"; // Adjust based on your User model
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+dotenv.config();
+
+// Generate reset token and save it to the user
+export const generateResetToken = async (email: string) => {
+  const user = (await User.findOne({ email })) as IUser;
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  user.resetPasswordToken = resetToken;
+  user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+  await user.save();
+
+  return { resetToken, user };
+};
+
+// Send reset password email
+export const sendResetPasswordEmail = async (email: string) => {
+  const { resetToken, user } = await generateResetToken(email);
+
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+  // Email setup
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    auth: {
+      user: process.env.ETHEREAL_USER,
+      pass: process.env.ETHEREAL_PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    to: email,
+    from: "noreply@localhost",
+    subject: "Password Reset Request",
+    html: `<p>You requested a password reset. Click <a href="${resetLink}">here</a> to reset your password.</p>`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Reset user password
+export const resetUserPassword = async (token: string, newPassword: string) => {
+  const user = (await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: new Date() },
+  })) as IUser;
+
+  if (!user) {
+    throw new Error("Invalid or expired token");
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(newPassword, salt);
+
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+
+  await user.save();
+};

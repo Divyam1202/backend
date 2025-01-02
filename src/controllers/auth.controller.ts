@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js"; // Correct import for named export
 import Portfolio from "../models/portfolio.models.js";
+import {
+  generateResetToken,
+  sendResetPasswordEmail,
+  resetUserPassword,
+} from "../services/ForgetPassword.service.js";
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -135,5 +140,26 @@ export const register = async (req: Request, res: Response) => {
       message: "Registration failed",
       error: error instanceof Error ? error.message : "Unknown error",
     });
+  }
+};
+
+export const requestPasswordReset = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    const { resetToken, user } = await generateResetToken(email);
+    await sendResetPasswordEmail(user.email);
+    res.status(200).json({ message: "Password reset email sent" });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, newPassword } = req.body;
+    await resetUserPassword(token, newPassword);
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
   }
 };
