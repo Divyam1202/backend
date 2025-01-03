@@ -146,20 +146,48 @@ export const register = async (req: Request, res: Response) => {
 export const requestPasswordReset = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    const { resetToken, user } = await generateResetToken(email);
-    await sendResetPasswordEmail(user.email);
+
+    // Validate input
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate reset token
+    const { resetToken } = await generateResetToken(email);
+
+    // Send reset password email
+    await sendResetPasswordEmail(user.email, resetToken);
+
     res.status(200).json({ message: "Password reset email sent" });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+  } catch (error) {
+    console.error("Password reset request error:", error);
+    res.status(500).json({ message: "Password reset request failed" });
   }
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token, newPassword } = req.body;
+
+    // Validate input
+    if (!token || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Token and new password are required" });
+    }
+
+    // Reset user password
     await resetUserPassword(token, newPassword);
+
     res.status(200).json({ message: "Password reset successful" });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+  } catch (error) {
+    console.error("Password reset error:", error);
+    res.status(500).json({ message: "Password reset failed" });
   }
 };
