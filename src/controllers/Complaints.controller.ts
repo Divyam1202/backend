@@ -3,7 +3,6 @@ import Complaint from "../models/complaints.model.js";
 import { User } from "../models/user.model.js"; // Correct import for named export
 
 // Create Complaint
-// const errorMessage = error.message || 'An unknown error occurred';
 export const createComplaint = async (req: Request, res: Response) => {
   try {
     const { description, type } = req.body;
@@ -34,12 +33,10 @@ export const createComplaint = async (req: Request, res: Response) => {
       .select("firstName lastName role")
       .lean();
     if (!student || student.role !== "student") {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Only students can create complaints",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Only students can create complaints",
+      });
     }
 
     const newComplaint = await Complaint.create({

@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import courseRoutes from "./routes/course.routes.js";
 import passwordroutes from "./routes/passwordreset.routes.js";
 import quizRoutes from "./routes/quiz.routes.js";
+import complaintRoutes from "./routes/complaint.routes.js";
 import http from "http";
 
 // Configure dotenv
@@ -28,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
+app.use("/api/complaints", complaintRoutes);
 app.use("/api/password", passwordroutes);
 app.use("/api/quiz", quizRoutes);
 

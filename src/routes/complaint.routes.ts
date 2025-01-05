@@ -10,6 +10,7 @@ import {
 import { authenticateToken } from "../middleware/auth.middleware.js"; // Authentication middleware
 import { authorizeAdmin } from "../middleware/authorizeAdmin.js"; // Admin authorization middleware
 import { authorizeRoles } from "../middleware/auth.middleware.js";
+
 const router = express.Router();
 
 // Middleware to authenticate the user (e.g., checking the JWT token)
@@ -25,6 +26,7 @@ router.get("/complaints", authorizeRoles(["instructor"]), getComplaints);
 router.get("/student", getStudentComplaints);
 
 // Route to update an existing complaint (Student only, for their own complaints)
+router.patch("/student/:id", updateComplaint);
 
 // Route to delete a complaint (Admin only)
 router.delete("/:id", authorizeAdmin, deleteComplaint);
