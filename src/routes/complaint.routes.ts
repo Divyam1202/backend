@@ -19,14 +19,22 @@ router.use(authenticateToken);
 // Route to create a new complaint
 router.post("/create", createComplaint);
 
-// Route to get all complaints (Admin only)
-router.get("/complaints", authorizeRoles(["instructor"]), getComplaints);
+// Route to get all complaints (Instructor only)
+router.get(
+  "/instructor/complaints",
+  authorizeRoles(["instructor"]),
+  getComplaints
+);
 
 // Route to get complaints of a specific student (authenticated student only)
 router.get("/student", getStudentComplaints);
 
-// Route to update an existing complaint (Student only, for their own complaints)
-router.patch("/student/:id", updateComplaint);
+// Route to update an existing complaint (Instructor only)
+router.patch(
+  "/instructor/update-complaint/:id",
+  authorizeRoles(["instructor"]),
+  updateComplaint
+);
 
 // Route to delete a complaint (Admin only)
 router.delete("/:id", authorizeAdmin, deleteComplaint);
