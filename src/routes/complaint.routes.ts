@@ -5,10 +5,11 @@ import {
   updateComplaint,
   deleteComplaint,
   getStudentComplaints,
+  updateStudentComplaint,
   deleteStudentComplaint,
 } from "../controllers/Complaints.controller.js";
-import { authenticateToken } from "../middleware/auth.middleware.js"; // Authentication middleware
-import { authorizeAdmin } from "../middleware/authorizeAdmin.js"; // Admin authorization middleware
+import { authenticateToken } from "../middleware/auth.middleware.js";
+import { authorizeAdmin } from "../middleware/authorizeAdmin.js";
 import { authorizeRoles } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -34,6 +35,13 @@ router.patch(
   "/instructor/update-complaint/:id",
   authorizeRoles(["instructor"]),
   updateComplaint
+);
+
+// Route to update a student's complaint (Student only)
+router.patch(
+  "/student/update-complaint/:id",
+  authorizeRoles(["student"]),
+  updateStudentComplaint
 );
 
 // Route to delete a complaint (Admin only)

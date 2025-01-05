@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.routes.js";
+import studentRoutes from "./routes/student.routes.js";
+import instructorRoutes from "./routes/instructor.routes.js";
 import courseRoutes from "./routes/course.routes.js";
 import passwordroutes from "./routes/passwordreset.routes.js";
 import quizRoutes from "./routes/quiz.routes.js";
@@ -28,6 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/instructor", instructorRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/password", passwordroutes);

@@ -159,6 +159,69 @@ export const updateComplaint = async (req: Request, res: Response) => {
   }
 };
 
+// Update Student Complaint (Student)
+export const updateStudentComplaint = async (req: Request, res: Response) => {
+  const { id } = req.params; // Extract complaint ID from the route
+  const { description } = req.body; // Extract updates from the request body
+  const studentId = req.user?._id; // Ensure the student is authenticated
+
+  try {
+    // Check if the student is authenticated
+    if (!studentId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    // Find the complaint by ID and ensure it belongs to the student
+    const complaint = await Complaint.findOne({ _id: id, student: studentId });
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found or unauthorized",
+      });
+    }
+
+    // Validate and update the description
+    if (description !== undefined) {
+      if (description.trim().length === 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Description cannot be empty" });
+      }
+      complaint.description = description.trim();
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "No description provided for update",
+      });
+    }
+
+    // Save the updated complaint
+    await complaint.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Complaint updated successfully",
+      complaint: {
+        _id: complaint._id,
+        description: complaint.description,
+        type: complaint.type,
+        status: complaint.status,
+        createdAt: complaint.createdAt,
+        updatedAt: complaint.updatedAt,
+      },
+    });
+  } catch (error: unknown) {
+    console.error("Error updating student complaint:", error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
 // Delete Complaint (Admin Only)
 export const deleteComplaint = async (req: Request, res: Response) => {
   const { id } = req.params;

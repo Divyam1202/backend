@@ -49,12 +49,12 @@ router.put(
 );
 
 // Complaints route
-router.get(
-  "/complaints",
-  authenticateToken,
-  authorizeRoles(["instructor"]),
-  getComplaints
-);
+// router.get(
+//   "/complaints",
+//   authenticateToken,
+//   authorizeRoles(["instructor"]),
+//   getComplaints
+// );
 
 // Optional: Leave management routes
 // Note: These are commented out for now, but you can implement them when needed.
@@ -74,19 +74,19 @@ router.get(
 // );
 
 // Complaint stats route
-router.get(
-  "/complaints",
-  authenticateToken,
-  authorizeRoles(["instructor"]),
-  getComplaints
-);
+// router.get(
+//   "/complaints",
+//   authenticateToken,
+//   authorizeRoles(["instructor"]),
+//   getComplaints
+// );
 
-router.patch(
-  "/update-complaint/:id",
-  authenticateToken,
-  authorizeRoles(["instructor"]),
-  updateComplaint
-);
+// router.patch(
+//   "/update-complaint/:id",
+//   authenticateToken,
+//   authorizeRoles(["instructor"]),
+//   updateComplaint
+// );
 
 // Mess-related routes (currently commented out)
 // router.post(

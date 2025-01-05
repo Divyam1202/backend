@@ -5,14 +5,9 @@ import {
 } from "../middleware/auth.middleware.js";
 import {
   getStudentProfile,
-  // getStudentLeaveStats,
-  // getStudentLeaves,
-  // submitLeave,
   updateStudentProfile,
   getStudentDashboardData,
   changeStudentPassword,
-  // getStudentRoomates,
-  // uploadProfilePicture,
 } from "../controllers/student.controller.js";
 import {
   createComplaint,
@@ -20,11 +15,6 @@ import {
   updateComplaint,
   deleteStudentComplaint,
 } from "../controllers/Complaints.controller.js";
-// import { configureMulter } from "../middleware/upload.middleware.js"; // Import the multer configuration
-// import { getMessPhoto } from "../controllers/mess.controller.js";
-
-// Configure multer for profile photos
-// const profileUpload = configureMulter("profile_photos");
 
 import {
   viewCourses,
@@ -55,20 +45,6 @@ router.put(
   authorizeRoles(["student"]),
   changeStudentPassword
 );
-
-// // Leave management routes
-// router.get(
-//   "/leaves",
-//   authenticateToken,
-//   authorizeRoles(["student"]),
-//   // getStudentLeaves
-// );
-// router.post(
-//   "/leaves/apply",
-//   authenticateToken,
-//   authorizeRoles(["student"]),
-//   // submitLeave
-// );
 
 router.get(
   "/complaint",
@@ -140,21 +116,12 @@ router.delete(
 );
 
 // Profile picture upload route
-router.post(
-  "/upload-profile-pic",
-  authenticateToken,
-  authorizeRoles(["student"])
-  // profileUpload.single("profilePic"), // Use the configured profileUpload middleware
-  // uploadProfilePicture
-);
-
-//mess-controls
-
-router.get(
-  "/mess-menu",
-  authenticateToken,
-  authorizeRoles(["student"])
-  // getMessPhoto
-);
+// router.post(
+//   "/upload-profile-pic",
+//   authenticateToken,
+//   authorizeRoles(["student"])
+//   // profileUpload.single("profilePic"), // Use the configured profileUpload middleware
+//   // uploadProfilePicture
+// );
 
 export default router;
