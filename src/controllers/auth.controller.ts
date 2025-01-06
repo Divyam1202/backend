@@ -7,6 +7,7 @@ import {
   sendResetPasswordEmail,
   resetUserPassword,
 } from "../services/ForgetPassword.service.js";
+import bcrypt from "bcryptjs";
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -25,8 +26,8 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Check password (using the model's comparePassword method)
-    const isMatch = await user.comparePassword(password);
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -52,8 +53,14 @@ export const login = async (req: Request, res: Response) => {
       user: userData,
     });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Login failed" });
+    console.error(
+      "Login error:",
+      error instanceof Error ? error.message : error
+    );
+    res.status(500).json({
+      message: "Login failed",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
 
@@ -135,7 +142,10 @@ export const register = async (req: Request, res: Response) => {
       user: responseData,
     });
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error(
+      "Registration error:",
+      error instanceof Error ? error.message : error
+    );
     res.status(500).json({
       message: "Registration failed",
       error: error instanceof Error ? error.message : "Unknown error",
@@ -166,8 +176,14 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Password reset email sent" });
   } catch (error) {
-    console.error("Password reset request error:", error);
-    res.status(500).json({ message: "Password reset request failed" });
+    console.error(
+      "Password reset request error:",
+      error instanceof Error ? error.message : error
+    );
+    res.status(500).json({
+      message: "Password reset request failed",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
 
@@ -187,7 +203,13 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
-    console.error("Password reset error:", error);
-    res.status(500).json({ message: "Password reset failed" });
+    console.error(
+      "Password reset error:",
+      error instanceof Error ? error.message : error
+    );
+    res.status(500).json({
+      message: "Password reset failed",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
