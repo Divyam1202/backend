@@ -56,8 +56,9 @@ export const resetUserPassword = async (token: string, newPassword: string) => {
     throw new Error("User not found");
   }
 
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(newPassword, salt);
+  // const salt = await bcrypt.genSalt(10);
+  // user.password = await bcrypt.hash(newPassword, salt);
+  user.password = newPassword;
 
   await user.save();
 };

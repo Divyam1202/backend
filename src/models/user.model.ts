@@ -2,113 +2,48 @@ import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcryptjs";
 
 // Define the interface for the User document
-export interface IUser extends mongoose.Document {
-  email: string;
-  password: string;
-  username: string;
+export interface IUser extends Document {
   firstName: string;
   lastName: string;
-  role: "admin" | "student" | "instructor" | "portfolio";
+  email: string;
+  password: string;
+  role: string;
+  username?: string; // Make username optional
   phoneNumber?: string;
-  portfolioUrl?: string; // Portfolio URL
-  about?: string; // Brief introduction
-  skills?: string[]; // Array of skills
-  portfolio?: mongoose.Types.ObjectId; // Reference to the Portfolio model
-  courses: mongoose.Types.ObjectId[]; // Courses field, referencing Course model
-  resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 // Define the User schema
-const userSchema: Schema<IUser> = new mongoose.Schema(
+const userSchema = new Schema<IUser>(
   {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    // username: {
-    //   type: String,
-    //   required: true,
-    // },
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: ["admin", "student", "instructor", "portfolio"],
-      required: true,
-      default: "student",
-    },
-    phoneNumber: {
-      type: String,
-      default: null,
-    },
-    portfolioUrl: {
-      type: String,
-      unique: true,
-      sparse: true, // Allow null or undefined, enforce uniqueness when present
-    },
-    about: {
-      type: String,
-      maxlength: 500, // Brief introduction
-    },
-    skills: {
-      type: [String],
-      default: [],
-    },
-    portfolio: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Portfolio", // Reference to the Portfolio model
-    },
-    courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }], // Add courses field
-    resetPasswordToken: {
-      type: String,
-      default: null, // Default to null if no token is generated
-    },
-    resetPasswordExpires: {
-      type: Date,
-      default: null, // Default to null if no expiration is set
-    },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, required: true },
+    username: { type: String, unique: true, sparse: true }, // Make username unique but optional
+    phoneNumber: { type: String },
   },
-  {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
-  }
+  { timestamps: true }
 );
 
-// Hash the password before saving the User
+// Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error as Error);
+  if (!this.isModified("password")) {
+    return next();
   }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
-// Compare candidate password with hashed password
+// Compare password method
 userSchema.methods.comparePassword = async function (
   candidatePassword: string
-): Promise<boolean> {
+) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Export the User model
 export const User = mongoose.model<IUser>("User", userSchema);
 
 export interface IPortfolio extends Document {

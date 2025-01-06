@@ -200,10 +200,10 @@ export const changeStudentPassword = async (req: Request, res: Response) => {
     }
 
     // Hash the new password
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    // const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
     // Update the password
-    student.password = hashedNewPassword;
+    student.password = newPassword;
     await student.save();
 
     return res.status(200).json({

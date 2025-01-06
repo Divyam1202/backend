@@ -8,10 +8,18 @@ const SubmissionSchema = new Schema({
   submittedAt: { type: Date, default: Date.now },
 });
 
+// Question Schema
+const QuestionSchema = new Schema({
+  question: { type: String, required: true },
+  options: { type: [String], required: true },
+  answerType: { type: String, required: true },
+});
+
 // Quiz Schema
 const QuizSchema = new Schema({
   title: { type: String, required: true },
-  questions: { type: [String], required: true },
+  questions: { type: [QuestionSchema], required: true },
+  scheduleTime: { type: Date, required: false },
   submissions: { type: [SubmissionSchema], default: [] },
 });
 
@@ -20,6 +28,7 @@ const AssignmentSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   dueDate: { type: Date, required: true },
+  scheduleTime: { type: Date, required: false },
   submissions: { type: [SubmissionSchema], default: [] },
 });
 

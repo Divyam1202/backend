@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import { Quiz, Assignment } from "../models/quiz.model.js";
 
-//create quiz
+// Create Quiz
 export const createQuiz = async (req: Request, res: Response) => {
-  // Parse the questions array if necessary
-  const { title, questions } = req.body;
+  const { title, questions, scheduleTime } = req.body;
 
   if (!title || !questions) {
     return res
@@ -13,12 +12,9 @@ export const createQuiz = async (req: Request, res: Response) => {
   }
 
   try {
-    // Ensure questions are an array (if not, parse it)
-    const parsedQuestions = Array.isArray(questions)
-      ? questions
-      : JSON.parse(questions);
+    const parsedQuestions = JSON.parse(questions);
 
-    const quiz = new Quiz({ title, questions: parsedQuestions });
+    const quiz = new Quiz({ title, questions: parsedQuestions, scheduleTime });
     await quiz.save();
 
     return res.status(201).json({
@@ -63,10 +59,17 @@ export const submitQuiz = async (req: Request, res: Response) => {
 
 // Create Assignment
 export const createAssignment = async (req: Request, res: Response) => {
-  const { title, description, dueDate } = req.body;
+  const { title, description, dueDate, scheduleTime } = req.body;
+  const file = req.file;
 
   try {
-    const assignment = new Assignment({ title, description, dueDate });
+    const assignment = new Assignment({
+      title,
+      description,
+      dueDate,
+      scheduleTime,
+      file: file ? file.path : null,
+    });
     await assignment.save();
 
     return res.status(201).json({
