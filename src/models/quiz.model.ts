@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 // Shared Submission Schema
 const SubmissionSchema = new Schema({
@@ -21,6 +21,7 @@ const QuizSchema = new Schema({
   questions: { type: [QuestionSchema], required: true },
   scheduleTime: { type: Date, required: false },
   submissions: { type: [SubmissionSchema], default: [] },
+  instructor: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 
 // Assignment Schema
@@ -30,6 +31,7 @@ const AssignmentSchema = new Schema({
   dueDate: { type: Date, required: true },
   scheduleTime: { type: Date, required: false },
   submissions: { type: [SubmissionSchema], default: [] },
+  instructor: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 
 // Combined Model

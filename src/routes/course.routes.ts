@@ -3,10 +3,11 @@ import {
   enrollInCourse,
   viewCourses,
   viewEnrolledCourses,
+  createCourse,
+  viewTeacherCourses,
   withdrawFromCourse,
   playCourse,
   updateProgress,
-  getCourseDetails,
 } from "../controllers/course.controller.js";
 import { authenticateToken } from "../middleware/auth.middleware.js";
 
@@ -18,7 +19,7 @@ const router = express.Router();
 router.get("/courses", authenticateToken, viewCourses);
 
 // Route to view courses the student is enrolled in
-router.get("/mycourses", authenticateToken, viewEnrolledCourses);
+router.get("/viewenrolled", authenticateToken, viewEnrolledCourses);
 
 // Route to enroll in a course (Student can enroll in courses)
 router.post("/enroll", authenticateToken, enrollInCourse);
@@ -27,12 +28,17 @@ router.post("/enroll", authenticateToken, enrollInCourse);
 router.delete("/withdraw", authenticateToken, withdrawFromCourse);
 
 // Route to Play Course
-router.get("/play/:courseId", authenticateToken, playCourse);
+router.post("/play/:courseId", authenticateToken, playCourse);
 
 // Route to Show Progress of Course
 router.put("/progress", authenticateToken, updateProgress);
 
-// Route to fetch course details
-router.get("/:courseId", authenticateToken, getCourseDetails);
+// ===================== Teacher Routes =====================
+
+// Route to create a new course (Only teachers can create courses)
+router.post("/create", authenticateToken, createCourse);
+
+// Route to view the courses created by the teacher
+router.get("/allinstructorcourses", authenticateToken, viewTeacherCourses);
 
 export default router;

@@ -118,30 +118,36 @@ export const viewEnrolledCourses = async (req: Request, res: Response) => {
   const studentId = req.user?._id;
 
   if (!studentId || typeof studentId !== "string") {
+    console.error("Student not authenticated or invalid ID:", studentId);
     return res
       .status(400)
       .json({ success: false, message: "Student not authenticated" });
   }
 
-  const studentObjectId = new mongoose.Types.ObjectId(studentId);
+  const studentObjectId = new mongoose.Types.ObjectId(studentId); // Convert string to ObjectId
 
   try {
+    console.log("Fetching courses for student:", studentObjectId);
     const courses = await Course.find({ students: studentObjectId });
 
     if (courses.length === 0) {
+      console.log("No courses found for student:", studentObjectId);
       return res
         .status(404)
         .json({ success: false, message: "No courses found for this student" });
     }
 
+    console.log("Courses found:", courses);
     return res.status(200).json({
       success: true,
       courses,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
+      console.error("Error fetching courses:", error.message);
       return res.status(500).json({ success: false, error: error.message });
     } else {
+      console.error("Unknown error occurred");
       return res.status(500).json({ success: false, error: "Unknown error" });
     }
   }
@@ -418,33 +424,5 @@ export const viewTeacherCourses = async (req: Request, res: Response) => {
     } else {
       return res.status(500).json({ success: false, error: "Unknown error" });
     }
-  }
-};
-
-// Fetch Course Details
-export const getCourseDetails = async (req: Request, res: Response) => {
-  const { courseId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(courseId)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid course ID" });
-  }
-
-  try {
-    const course = await Course.findById(courseId).populate("modules");
-
-    if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Course not found" });
-    }
-
-    return res.status(200).json({ success: true, course });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error instanceof Error ? error.message : "Unexpected error",
-    });
   }
 };
