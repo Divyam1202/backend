@@ -11,6 +11,7 @@ export interface IUser extends Document {
   username?: string; // Make username optional
   phoneNumber?: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
+  courses?: mongoose.Types.ObjectId[]; // Add courses property
 }
 
 // Define the User schema
@@ -23,6 +24,7 @@ const userSchema = new Schema<IUser>(
     role: { type: String, required: true },
     username: { type: String, unique: true, sparse: true }, // Make username unique but optional
     phoneNumber: { type: String },
+    courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }], // Add courses field
   },
   { timestamps: true }
 );

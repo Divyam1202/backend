@@ -40,12 +40,10 @@ export const createAdmin = async (req: Request, res: Response) => {
         .status(500)
         .json({ message: "Failed to create admin user", error: error.message });
     } else {
-      res
-        .status(500)
-        .json({
-          message: "Failed to create admin user",
-          error: "Unknown error",
-        });
+      res.status(500).json({
+        message: "Failed to create admin user",
+        error: "Unknown error",
+      });
     }
   }
 };
@@ -109,19 +107,15 @@ export const getStudentProfileInfo = async (req: Request, res: Response) => {
     res.status(200).json({ student });
   } catch (error) {
     if (error instanceof Error) {
-      res
-        .status(500)
-        .json({
-          message: "Error fetching student profile",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Error fetching student profile",
+        error: error.message,
+      });
     } else {
-      res
-        .status(500)
-        .json({
-          message: "Error fetching student profile",
-          error: "Unknown error",
-        });
+      res.status(500).json({
+        message: "Error fetching student profile",
+        error: "Unknown error",
+      });
     }
   }
 };
@@ -205,19 +199,15 @@ export const assignCourseToStudent = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Course assigned successfully", student });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res
-        .status(500)
-        .json({
-          message: "Error assigning course to student",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Error assigning course to student",
+        error: error.message,
+      });
     } else {
-      res
-        .status(500)
-        .json({
-          message: "Error assigning course to student",
-          error: "Unknown error",
-        });
+      res.status(500).json({
+        message: "Error assigning course to student",
+        error: "Unknown error",
+      });
     }
   }
 };
@@ -246,19 +236,15 @@ export const removeCourseFromStudent = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Course removed successfully", student });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res
-        .status(500)
-        .json({
-          message: "Error removing course from student",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Error removing course from student",
+        error: error.message,
+      });
     } else {
-      res
-        .status(500)
-        .json({
-          message: "Error removing course from student",
-          error: "Unknown error",
-        });
+      res.status(500).json({
+        message: "Error removing course from student",
+        error: "Unknown error",
+      });
     }
   }
 };
@@ -320,12 +306,10 @@ export const getAllInstructors = async (_req: Request, res: Response) => {
         .status(500)
         .json({ message: "Error fetching instructors", error: error.message });
     } else {
-      res
-        .status(500)
-        .json({
-          message: "Error fetching instructors",
-          error: "Unknown error",
-        });
+      res.status(500).json({
+        message: "Error fetching instructors",
+        error: "Unknown error",
+      });
     }
   }
 };
