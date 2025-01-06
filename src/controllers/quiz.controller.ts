@@ -92,15 +92,27 @@ export const createAssignment = async (req: Request, res: Response) => {
   }
 
   const { title, description, dueDate, scheduleTime } = req.body;
+  const instructorId = req.user?._id;
   const file = req.file;
 
+  //console.log("Received payload:", req.body); // Log the received payload
+
+  if (!title || !description) {
+    return res.status(400).json({
+      success: false,
+      message: "Title and description are required.",
+    });
+  }
+
   try {
+    const parsedAssignment = JSON.parse(description);
     const assignment = new Assignment({
       title,
-      description,
+      description: parsedAssignment,
       dueDate,
       scheduleTime,
       file: file ? file.path : null,
+      instructor: instructorId,
     });
     await assignment.save();
 
